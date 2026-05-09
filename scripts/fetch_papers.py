@@ -16,6 +16,7 @@ from urllib.parse import quote_plus
 
 PUBMED_SEARCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 PUBMED_FETCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+EUROPEPMC_SEARCH = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
 
 HEADERS = {"User-Agent": "AlzheimerDementiaBot/1.0 (research aggregator; +https://github.com/u8901006/alzheimer-dementia)"}
 
@@ -117,7 +118,48 @@ def search_papers(query, retmax=50):
         return []
 
 
-def fetch_details(pmids):
+def search_europepmc(days, max_papers=40):
+    import time
+    lookback_date = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
+    query = (
+        '(TITLE:"Alzheimer*" OR TITLE:"dementia" OR TITLE:"mild cognitive impairment" OR TITLE:"MCI") '
+        f'AND OPEN_ACCESS:y AND PUB_DATE:[{lookback_date} TO 20261231]'
+    )
+    params = f"?query={quote_plus(query)}&resultType=core&pageSize={max_papers}&format=json&cursorMark=*"
+    url = EUROPEPMC_SEARCH + params
+    print(f"[INFO] Searching Europe PMC...", file=sys.stderr)
+    try:
+        req = Request(url, headers=HEADERS)
+        with urlopen(req, timeout=30) as resp:
+            body = resp.read().decode()
+        data = json.loads(body)
+        results = data.get("resultList", {}).get("result", [])
+        papers = []
+        for r in results:
+            pmid = r.get("pmid", "")
+            title = r.get("title", "")
+            journal = r.get("journalTitle", "")
+            abstract = r.get("abstractText", "")[:2000] if r.get("abstractText") else ""
+            date_str = r.get("firstPublicationDate", "")
+            url_link = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else r.get("doi", "")
+            keywords = r.get("keywordList", {}).get("keyword", [])
+            if isinstance(keywords, str):
+                keywords = [keywords]
+            if title:
+                papers.append({
+                    "pmid": pmid or r.get("id", ""),
+                    "title": title,
+                    "journal": journal,
+                    "date": date_str,
+                    "abstract": abstract,
+                    "url": url_link,
+                    "keywords": keywords,
+                })
+        print(f"[INFO] Europe PMC returned {len(papers)} papers", file=sys.stderr)
+        return papers
+    except Exception as e:
+        print(f"[ERROR] Europe PMC search failed: {e}", file=sys.stderr)
+        return []
     if not pmids:
         return []
     ids = ",".join(pmids)
@@ -203,13 +245,30 @@ def main():
     print(f"[INFO] Searching PubMed for AD papers from last {args.days} days (since {lookback})...", file=sys.stderr)
 
     processed_pmids = load_processed_pmids()
-    all_pmids = set()
 
+    print(f"[INFO] Attempting PubMed with journal-based query...", file=sys.stderr)
     query = build_journal_query(JOURNALS, args.days)
-    print(f"[INFO] Searching PubMed with journal-based query...", file=sys.stderr)
     pmids = search_papers(query, args.max_papers)
-    for id in pmids:
-        all_pmids.add(id)
+    all_pmids = set(pmids)
+
+    if not all_pmids:
+        print("[INFO] PubMed returned no results, trying Europe PMC...", file=sys.stderr)
+        papers = search_europepmc(args.days, args.max_papers)
+        if not papers:
+            print("[INFO] No papers from any source", file=sys.stderr)
+            output_data = {"date": target_date, "count": 0, "papers": []}
+            with open(args.output, "w", encoding="utf-8") as f:
+                json.dump(output_data, f, ensure_ascii=False, indent=2)
+            return
+
+        new_papers = [p for p in papers if p["pmid"] not in processed_pmids]
+        print(f"[INFO] Europe PMC: {len(new_papers)} new papers (filtered from {len(papers)})", file=sys.stderr)
+
+        output_data = {"date": target_date, "count": len(new_papers), "papers": new_papers[:args.max_papers]}
+        with open(args.output, "w", encoding="utf-8") as f:
+            json.dump(output_data, f, ensure_ascii=False, indent=2)
+        print(f"[INFO] Saved to {args.output}", file=sys.stderr)
+        return
 
     new_pmids = [id for id in all_pmids if id not in processed_pmids]
     print(f"[INFO] Total unique PMIDs: {len(all_pmids)}, new (unprocessed): {len(new_pmids)}", file=sys.stderr)
