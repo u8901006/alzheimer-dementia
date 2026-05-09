@@ -41,14 +41,6 @@ jobs:
           fi
           echo "Date: $(grep target "$GITHUB_OUTPUT" | cut -d= -f2)"
 
-      - name: Debug API access
-        run: |
-          echo "--- Testing Europe PMC API ---"
-          curl -s "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=Alzheimer&resultType=core&pageSize=3&format=json" | head -c 1000
-          echo ""
-          echo "--- Testing PubMed API ---"
-          curl -s "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=Alzheimer&retmax=3&retmode=json" | head -c 500
-
       - name: Fetch papers from PubMed
         run: python3 scripts/fetch_papers.py --days 7 --max-papers 40 --output papers.json
         continue-on-error: true
