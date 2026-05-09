@@ -1,0 +1,12 @@
+{
+  "name": "alzheimer-dementia-daily-report",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "fetch": "node scripts/fetch-papers.mjs",
+    "report": "node scripts/generate-report.mjs",
+    "index": "node scripts/generate-index.mjs",
+    "build": "npm run fetch && npm run report && npm run index"
+  }
+}
