@@ -118,16 +118,25 @@ function loadProcessedPmids() {
 }
 
 async function pubmedSearch(query, retmax = 50) {
-  const url = new URL(PUBMED_SEARCH);
-  url.searchParams.set("db", "pubmed");
-  url.searchParams.set("term", query);
-  url.searchParams.set("retmax", String(retmax));
-  url.searchParams.set("sort", "date");
-  url.searchParams.set("retmode", "json");
+  const params = new URLSearchParams();
+  params.set("db", "pubmed");
+  params.set("term", query);
+  params.set("retmax", String(retmax));
+  params.set("sort", "date");
+  params.set("retmode", "json");
+  const url = `${PUBMED_SEARCH}?${params.toString()}`;
+  console.error(`[DEBUG] Search URL length: ${url.length}`);
   try {
-    const resp = await fetch(url.toString(), { headers: HEADERS, signal: AbortSignal.timeout(30000) });
+    const resp = await fetch(url, { headers: HEADERS, signal: AbortSignal.timeout(30000) });
+    if (!resp.ok) {
+      const body = await resp.text().catch(() => "");
+      console.error(`[ERROR] PubMed search HTTP ${resp.status}: ${body.slice(0, 200)}`);
+      return [];
+    }
     const data = await resp.json();
-    return data?.esearchresult?.idlist || [];
+    const ids = data?.esearchresult?.idlist || [];
+    console.error(`[DEBUG] PubMed returned ${ids.length} IDs, translated=${data?.esearchresult?.translatedquerycount || "N/A"}`);
+    return ids;
   } catch (e) {
     console.error(`[ERROR] PubMed search failed: ${e.message}`);
     return [];
@@ -136,14 +145,22 @@ async function pubmedSearch(query, retmax = 50) {
 
 async function pubmedFetch(pmids) {
   if (!pmids.length) return [];
-  const url = new URL(PUBMED_FETCH);
-  url.searchParams.set("db", "pubmed");
-  url.searchParams.set("id", pmids.join(","));
-  url.searchParams.set("retmode", "xml");
+  const params = new URLSearchParams();
+  params.set("db", "pubmed");
+  params.set("id", pmids.join(","));
+  params.set("retmode", "xml");
+  const url = `${PUBMED_FETCH}?${params.toString()}`;
+  console.error(`[DEBUG] Fetching ${pmids.length} PMIDs...`);
   try {
-    const resp = await fetch(url.toString(), { headers: HEADERS, signal: AbortSignal.timeout(60000) });
+    const resp = await fetch(url, { headers: HEADERS, signal: AbortSignal.timeout(60000) });
+    if (!resp.ok) {
+      console.error(`[ERROR] PubMed fetch HTTP ${resp.status}`);
+      return [];
+    }
     const xml = await resp.text();
-    return parseXmlPapers(xml);
+    const papers = parseXmlPapers(xml);
+    console.error(`[DEBUG] Parsed ${papers.length} papers from XML`);
+    return papers;
   } catch (e) {
     console.error(`[ERROR] PubMed fetch failed: ${e.message}`);
     return [];

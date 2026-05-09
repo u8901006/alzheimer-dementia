@@ -10,6 +10,9 @@ on:
         required: false
         default: ""
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 permissions:
   contents: write
 
@@ -39,8 +42,18 @@ jobs:
           echo "Date: $(grep target "$GITHUB_OUTPUT" | cut -d= -f2)"
 
       - name: Fetch papers from PubMed
-        run: node scripts/fetch-papers.mjs --days 7 --max-papers 40 --output papers.json
-        continue-on-error: true
+        id: fetch
+        run: |
+          node scripts/fetch-papers.mjs \
+            --days 7 \
+            --max-papers 40 \
+            --output papers.json 2>&1 || true
+          echo "--- Papers JSON check ---"
+          if [ -f papers.json ]; then
+            head -c 500 papers.json
+          else
+            echo "papers.json NOT created"
+          fi
         timeout-minutes: 10
         env:
           TARGET_DATE: ${{ steps.date.outputs.target }}
@@ -49,12 +62,12 @@ jobs:
         id: papers
         run: |
           if [ -f papers.json ] && grep -q '"count"' papers.json; then
-            COUNT=$(node -e "const d=require('./papers.json'); console.log(d.count||0)")
+            COUNT=$(node -e "const d=JSON.parse(require('fs').readFileSync('papers.json','utf8')); console.log(d.count||0)")
             echo "count=$COUNT" >> "$GITHUB_OUTPUT"
             echo "Papers found: $COUNT"
           else
             echo "count=0" >> "$GITHUB_OUTPUT"
-            echo '{"date":"${{ steps.date.outputs.target }}","count":0,"papers":[]}' > papers.json
+            node -e "require('fs').writeFileSync('papers.json',JSON.stringify({date:'${{ steps.date.outputs.target }}',count:0,papers:[]},null,2))"
             echo "No papers found, will generate empty report"
           fi
 
@@ -65,6 +78,9 @@ jobs:
         run: node scripts/generate-report.mjs --input papers.json --output docs/alzheimer-${{ steps.date.outputs.target }}.html
         timeout-minutes: 10
 
+      - name: Ensure .nojekyll
+        run: touch docs/.nojekyll
+
       - name: Generate index page
         run: node scripts/generate-index.mjs
 
@@ -74,13 +90,13 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/
           git diff --cached --quiet && echo "No changes to commit" && exit 0
-          git commit -m "📄 alzheimer dementia daily report: ${{ steps.date.outputs.target }}"
+          git commit -m "alzheimer dementia daily report: ${{ steps.date.outputs.target }}"
           git pull --rebase origin main
           git push
 
       - name: Summary
         run: |
-          echo "### 📄 Alzheimer's Disease Daily Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Alzheimer's Disease Daily Report" >> "$GITHUB_STEP_SUMMARY"
           echo "**Date:** ${{ steps.date.outputs.target }}" >> "$GITHUB_STEP_SUMMARY"
           echo "**Papers analyzed:** ${{ steps.papers.outputs.count }}" >> "$GITHUB_STEP_SUMMARY"
           echo "**Report:** [alzheimer-${{ steps.date.outputs.target }}.html](https://u8901006.github.io/alzheimer-dementia/alzheimer-${{ steps.date.outputs.target }}.html)" >> "$GITHUB_STEP_SUMMARY"
