@@ -119,14 +119,12 @@ def search_papers(query, retmax=50):
 
 
 def search_europepmc(days, max_papers=40):
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     lookback_date = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
-    query = (
-        '(TITLE:"Alzheimer*" OR TITLE:"dementia" OR TITLE:"mild cognitive impairment") '
-        f'AND PUB_DATE:[{lookback_date} TO 20991231]'
-    )
+    query = f'(TITLE:"Alzheimer" OR TITLE:"dementia") AND FIRST_PUB_DATE:[{lookback_date} TO {today}]'
     params = f"?query={quote_plus(query)}&resultType=core&pageSize={max_papers}&format=json&cursorMark=*"
     url = EUROPEPMC_SEARCH + params
-    print(f"[INFO] Searching Europe PMC...", file=sys.stderr)
+    print(f"[INFO] Searching Europe PMC with query: {query}", file=sys.stderr)
     try:
         req = Request(url, headers=HEADERS)
         with urlopen(req, timeout=30) as resp:
@@ -134,7 +132,12 @@ def search_europepmc(days, max_papers=40):
         if not body or not body.strip():
             print("[WARN] Europe PMC returned empty body", file=sys.stderr)
             return []
+        if body.strip().startswith("<"):
+            print(f"[ERROR] Europe PMC returned HTML: {body[:200]}", file=sys.stderr)
+            return []
         data = json.loads(body)
+        hit_count = data.get("hitCount", 0)
+        print(f"[INFO] Europe PMC hit count: {hit_count}", file=sys.stderr)
         results = data.get("resultList", {}).get("result", [])
         papers = []
         for r in results:
