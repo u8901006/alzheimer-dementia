@@ -19,40 +19,46 @@ PUBMED_FETCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 
 HEADERS = {"User-Agent": "AlzheimerDementiaBot/1.0 (research aggregator; +https://github.com/u8901006/alzheimer-dementia)"}
 
-SEARCH_TOPICS = [
-    {
-        "name": "broad-overview",
-        "query": '("Alzheimer Disease"[MeSH Terms] OR "Alzheimer disease"[Title/Abstract] OR "Alzheimer\'s disease"[Title/Abstract] OR "AD dementia"[Title/Abstract]) AND NOT (animals[MeSH Terms] NOT humans[MeSH Terms])',
-    },
-    {
-        "name": "biomarkers",
-        "query": '("Alzheimer Disease"[MeSH Terms] OR "Alzheimer disease"[Title/Abstract] OR "Alzheimer\'s disease"[Title/Abstract]) AND ("Biomarkers"[MeSH Terms] OR biomarker*[Title/Abstract] OR "blood biomarker*"[Title/Abstract] OR plasma[Title/Abstract] OR "p-tau"[Title/Abstract] OR "amyloid PET"[Title/Abstract] OR "tau PET"[Title/Abstract]) AND NOT (animals[MeSH Terms] NOT humans[MeSH Terms])',
-    },
-    {
-        "name": "clinical-trials",
-        "query": '("Alzheimer Disease"[MeSH Terms] OR "Alzheimer disease"[Title/Abstract] OR "Alzheimer\'s disease"[Title/Abstract]) AND ("Randomized Controlled Trial"[Publication Type] OR randomized[Title/Abstract] OR placebo[Title/Abstract] OR lecanemab[Title/Abstract] OR donanemab[Title/Abstract] OR aducanumab[Title/Abstract]) AND NOT (animals[MeSH Terms] NOT humans[MeSH Terms])',
-    },
-    {
-        "name": "caregiving",
-        "query": '("Alzheimer Disease"[MeSH Terms] OR "Alzheimer disease"[Title/Abstract] OR "Alzheimer\'s disease"[Title/Abstract] OR dementia[Title/Abstract]) AND ("Caregivers"[MeSH Terms] OR caregiver*[Title/Abstract] OR "caregiver burden"[Title/Abstract] OR "family caregiving"[Title/Abstract]) AND NOT (animals[MeSH Terms] NOT humans[MeSH Terms])',
-    },
-    {
-        "name": "nutrition-exercise",
-        "query": '("Alzheimer Disease"[MeSH Terms] OR "Alzheimer disease"[Title/Abstract] OR "Alzheimer\'s disease"[Title/Abstract] OR dementia[Title/Abstract] OR "cognitive decline"[Title/Abstract]) AND ("Diet"[MeSH Terms] OR "Exercise"[MeSH Terms] OR "Mediterranean diet"[Title/Abstract] OR "MIND diet"[Title/Abstract] OR "physical activity"[Title/Abstract] OR sleep[Title/Abstract]) AND NOT (animals[MeSH Terms] NOT humans[MeSH Terms])',
-    },
-    {
-        "name": "neuroimaging",
-        "query": '("Alzheimer Disease"[MeSH Terms] OR "Alzheimer disease"[Title/Abstract] OR "Alzheimer\'s disease"[Title/Abstract]) AND ("Neuroimaging"[MeSH Terms] OR MRI[Title/Abstract] OR PET[Title/Abstract] OR "amyloid PET"[Title/Abstract] OR "tau PET"[Title/Abstract] OR fMRI[Title/Abstract] OR "cortical thickness"[Title/Abstract]) AND NOT (animals[MeSH Terms] NOT humans[MeSH Terms])',
-    },
-    {
-        "name": "mci",
-        "query": '("Alzheimer Disease"[MeSH Terms] OR "Alzheimer disease"[Title/Abstract] OR "Alzheimer\'s disease"[Title/Abstract]) AND ("Mild Cognitive Impairment"[MeSH Terms] OR "mild cognitive impairment"[Title/Abstract] OR MCI[Title/Abstract] OR prodromal[Title/Abstract]) AND NOT (animals[MeSH Terms] NOT humans[MeSH Terms])',
-    },
-    {
-        "name": "social-determinants",
-        "query": '("Alzheimer Disease"[MeSH Terms] OR "Alzheimer disease"[Title/Abstract] OR "Alzheimer\'s disease"[Title/Abstract] OR dementia[Title/Abstract]) AND ("Social Determinants of Health"[MeSH Terms] OR "Health Equity"[MeSH Terms] OR "socioeconomic status"[Title/Abstract] OR disparities[Title/Abstract] OR stigma[Title/Abstract] OR "social isolation"[Title/Abstract]) AND NOT (animals[MeSH Terms] NOT humans[MeSH Terms])',
-    },
+JOURNALS = [
+    "Alzheimer's & Dementia",
+    "Alzheimer Disease & Associated Disorders",
+    "Journal of Alzheimer's Disease",
+    "Alzheimer's Research & Therapy",
+    "Current Alzheimer Research",
+    "Journal of Prevention of Alzheimer's Disease",
+    "Neurodegenerative Diseases",
+    "Neurology",
+    "JAMA Neurology",
+    "Lancet Neurology",
+    "Brain",
+    "Annals of Neurology",
+    "Nature Neuroscience",
+    "Nature Medicine",
+    "Nature Aging",
+    "Molecular Psychiatry",
+    "Biological Psychiatry",
+    "Neurobiology of Aging",
+    "Molecular Neurodegeneration",
+    "Acta Neuropathologica",
+    "Age and Ageing",
+    "American Journal of Geriatric Psychiatry",
+    "New England Journal of Medicine",
+    "The Lancet",
+    "JAMA",
+    "BMJ",
+    "eBioMedicine",
+    "eClinicalMedicine",
+    "International Psychogeriatrics",
+    "Frontiers in Dementia",
 ]
+
+
+def build_journal_query(journals, days):
+    journal_part = " OR ".join([f'"{j}"[Journal]' for j in journals[:15]])
+    lookback = get_date_n_days_ago(days)
+    date_part = f'"{lookback}"[Date - Publication] : "3000"[Date - Publication]'
+    ad_terms = '("Alzheimer Disease"[MeSH Terms] OR "Alzheimer disease"[Title/Abstract] OR "Alzheimer\'s disease"[Title/Abstract] OR dementia[Title/Abstract] OR "mild cognitive impairment"[Title/Abstract])'
+    return f"({journal_part}) AND {date_part} AND {ad_terms} AND NOT (animals[MeSH Terms] NOT humans[MeSH Terms])"
 
 
 def get_taipei_date():
@@ -92,8 +98,20 @@ def search_papers(query, retmax=50):
     try:
         req = Request(url, headers=HEADERS)
         with urlopen(req, timeout=30) as resp:
-            data = json.loads(resp.read().decode())
-        return data.get("esearchresult", {}).get("idlist", [])
+            body = resp.read().decode()
+            if not body or not body.strip():
+                print(f"[WARN] PubMed returned empty body for query (len={len(query)})", file=sys.stderr)
+                return []
+            if body.strip().startswith("<!") or body.strip().startswith("<html"):
+                print(f"[ERROR] PubMed returned HTML: {body[:200]}", file=sys.stderr)
+                return []
+            data = json.loads(body)
+            ids = data.get("esearchresult", {}).get("idlist", [])
+            print(f"[INFO] PubMed returned {len(ids)} IDs", file=sys.stderr)
+            return ids
+    except json.JSONDecodeError as e:
+        print(f"[ERROR] PubMed JSON parse failed: {e} (body[:200]={body[:200] if 'body' in dir() else 'N/A'})", file=sys.stderr)
+        return []
     except Exception as e:
         print(f"[ERROR] PubMed search failed: {e}", file=sys.stderr)
         return []
@@ -187,13 +205,11 @@ def main():
     processed_pmids = load_processed_pmids()
     all_pmids = set()
 
-    for topic in SEARCH_TOPICS:
-        date_filter = f'"{lookback}"[Date - Publication] : "3000"[Date - Publication]'
-        full_query = f"{topic['query']} AND {date_filter}"
-        print(f"[INFO] Searching topic: {topic['name']}...", file=sys.stderr)
-        pmids = search_papers(full_query, min(20, args.max_papers))
-        for id in pmids:
-            all_pmids.add(id)
+    query = build_journal_query(JOURNALS, args.days)
+    print(f"[INFO] Searching PubMed with journal-based query...", file=sys.stderr)
+    pmids = search_papers(query, args.max_papers)
+    for id in pmids:
+        all_pmids.add(id)
 
     new_pmids = [id for id in all_pmids if id not in processed_pmids]
     print(f"[INFO] Total unique PMIDs: {len(all_pmids)}, new (unprocessed): {len(new_pmids)}", file=sys.stderr)
