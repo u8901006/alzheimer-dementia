@@ -120,7 +120,7 @@ def search_papers(query, retmax=50):
 
 def search_europepmc(days, max_papers=40):
     query = 'Alzheimer OR dementia OR "mild cognitive impairment"'
-    params = f"?query={quote_plus(query)}&resultType=core&pageSize={max_papers}&format=json&cursorMark=*&sort={quote_plus('DATE desc')}"
+    params = f"?query={quote_plus(query)}&resultType=core&pageSize={max_papers}&format=json&cursorMark=*"
     url = EUROPEPMC_SEARCH + params
     print(f"[INFO] Searching Europe PMC...", file=sys.stderr)
     try:
