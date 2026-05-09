@@ -42,18 +42,8 @@ jobs:
           echo "Date: $(grep target "$GITHUB_OUTPUT" | cut -d= -f2)"
 
       - name: Fetch papers from PubMed
-        id: fetch
-        run: |
-          node scripts/fetch-papers.mjs \
-            --days 7 \
-            --max-papers 40 \
-            --output papers.json 2>&1 || true
-          echo "--- Papers JSON check ---"
-          if [ -f papers.json ]; then
-            head -c 500 papers.json
-          else
-            echo "papers.json NOT created"
-          fi
+        run: python3 scripts/fetch_papers.py --days 7 --max-papers 40 --output papers.json
+        continue-on-error: true
         timeout-minutes: 15
         env:
           TARGET_DATE: ${{ steps.date.outputs.target }}
