@@ -7,8 +7,7 @@ import { URL } from "node:url";
 const PUBMED_SEARCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi";
 const PUBMED_FETCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi";
 const HEADERS = {
-  "User-Agent": "AlzheimerDementiaBot/1.0 (research aggregator)",
-  "Accept": "application/json",
+  "User-Agent": "Mozilla/5.0 (compatible; AlzheimerDementiaBot/1.0; +https://github.com/u8901006/alzheimer-dementia)",
 };
 
 const JOURNALS = [
@@ -130,24 +129,30 @@ async function pubmedSearch(query, retmax = 50) {
   params.set("tool", "AlzheimerDementiaBot");
   params.set("email", "alzheimer-dementia-bot@users.noreply.github.com");
   const url = `${PUBMED_SEARCH}?${params.toString()}`;
-  console.error(`[DEBUG] Search URL: ${url.slice(0, 200)}...`);
-  try {
-    const resp = await fetch(url, { headers: HEADERS, signal: AbortSignal.timeout(30000) });
-    const text = await resp.text();
-    if (!resp.ok || text.trim().startsWith("<!")) {
-      console.error(`[ERROR] PubMed search returned ${resp.status}: ${text.slice(0, 300)}`);
-      return [];
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const resp = await fetch(url, { headers: HEADERS, signal: AbortSignal.timeout(30000) });
+      const text = await resp.text();
+      if (!resp.ok || text.trim().startsWith("<!") || text.trim().startsWith("<html")) {
+        console.error(`[WARN] PubMed returned non-JSON (attempt ${attempt + 1}): ${text.slice(0, 150)}`);
+        const wait = 5000 * (attempt + 1);
+        console.error(`[WARN] Waiting ${wait / 1000}s before retry...`);
+        await new Promise((r) => setTimeout(r, wait));
+        continue;
+      }
+      const data = JSON.parse(text);
+      const ids = data?.esearchresult?.idlist || [];
+      const errors = data?.esearchresult?.ERRORLIST?.ERROR;
+      if (errors) console.error(`[WARN] PubMed warnings: ${JSON.stringify(errors)}`);
+      console.error(`[DEBUG] PubMed returned ${ids.length} IDs`);
+      return ids;
+    } catch (e) {
+      console.error(`[ERROR] PubMed search failed (attempt ${attempt + 1}): ${e.message}`);
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 3000));
     }
-    const data = JSON.parse(text);
-    const ids = data?.esearchresult?.idlist || [];
-    const errors = data?.esearchresult?.ERRORLIST?.ERROR;
-    if (errors) console.error(`[WARN] PubMed warnings: ${JSON.stringify(errors)}`);
-    console.error(`[DEBUG] PubMed returned ${ids.length} IDs`);
-    return ids;
-  } catch (e) {
-    console.error(`[ERROR] PubMed search failed: ${e.message}`);
-    return [];
   }
+  console.error(`[ERROR] PubMed search failed after 3 attempts`);
+  return [];
 }
 
 async function pubmedFetch(pmids) {
@@ -256,6 +261,7 @@ async function main() {
     console.error(`[INFO] Searching topic: ${topic.name}...`);
     const pmids = await pubmedSearch(fullQuery, Math.min(20, opts.maxPapers));
     for (const id of pmids) allPmids.add(id);
+    await new Promise((r) => setTimeout(r, 1500));
   }
 
   const newPmids = [...allPmids].filter((id) => !processedPmids.has(id));

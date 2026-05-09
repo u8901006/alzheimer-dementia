@@ -54,7 +54,7 @@ jobs:
           else
             echo "papers.json NOT created"
           fi
-        timeout-minutes: 10
+        timeout-minutes: 15
         env:
           TARGET_DATE: ${{ steps.date.outputs.target }}
 
