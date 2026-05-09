@@ -6,7 +6,10 @@ import { URL } from "node:url";
 
 const PUBMED_SEARCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi";
 const PUBMED_FETCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi";
-const HEADERS = { "User-Agent": "AlzheimerDementiaBot/1.0 (research aggregator)" };
+const HEADERS = {
+  "User-Agent": "AlzheimerDementiaBot/1.0 (research aggregator)",
+  "Accept": "application/json",
+};
 
 const JOURNALS = [
   "Alzheimer's & Dementia",
@@ -124,18 +127,22 @@ async function pubmedSearch(query, retmax = 50) {
   params.set("retmax", String(retmax));
   params.set("sort", "date");
   params.set("retmode", "json");
+  params.set("tool", "AlzheimerDementiaBot");
+  params.set("email", "alzheimer-dementia-bot@users.noreply.github.com");
   const url = `${PUBMED_SEARCH}?${params.toString()}`;
-  console.error(`[DEBUG] Search URL length: ${url.length}`);
+  console.error(`[DEBUG] Search URL: ${url.slice(0, 200)}...`);
   try {
     const resp = await fetch(url, { headers: HEADERS, signal: AbortSignal.timeout(30000) });
-    if (!resp.ok) {
-      const body = await resp.text().catch(() => "");
-      console.error(`[ERROR] PubMed search HTTP ${resp.status}: ${body.slice(0, 200)}`);
+    const text = await resp.text();
+    if (!resp.ok || text.trim().startsWith("<!")) {
+      console.error(`[ERROR] PubMed search returned ${resp.status}: ${text.slice(0, 300)}`);
       return [];
     }
-    const data = await resp.json();
+    const data = JSON.parse(text);
     const ids = data?.esearchresult?.idlist || [];
-    console.error(`[DEBUG] PubMed returned ${ids.length} IDs, translated=${data?.esearchresult?.translatedquerycount || "N/A"}`);
+    const errors = data?.esearchresult?.ERRORLIST?.ERROR;
+    if (errors) console.error(`[WARN] PubMed warnings: ${JSON.stringify(errors)}`);
+    console.error(`[DEBUG] PubMed returned ${ids.length} IDs`);
     return ids;
   } catch (e) {
     console.error(`[ERROR] PubMed search failed: ${e.message}`);
@@ -149,12 +156,15 @@ async function pubmedFetch(pmids) {
   params.set("db", "pubmed");
   params.set("id", pmids.join(","));
   params.set("retmode", "xml");
+  params.set("tool", "AlzheimerDementiaBot");
+  params.set("email", "alzheimer-dementia-bot@users.noreply.github.com");
   const url = `${PUBMED_FETCH}?${params.toString()}`;
   console.error(`[DEBUG] Fetching ${pmids.length} PMIDs...`);
   try {
     const resp = await fetch(url, { headers: HEADERS, signal: AbortSignal.timeout(60000) });
     if (!resp.ok) {
-      console.error(`[ERROR] PubMed fetch HTTP ${resp.status}`);
+      const text = await resp.text().catch(() => "");
+      console.error(`[ERROR] PubMed fetch HTTP ${resp.status}: ${text.slice(0, 200)}`);
       return [];
     }
     const xml = await resp.text();
