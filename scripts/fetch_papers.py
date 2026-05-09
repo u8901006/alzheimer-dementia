@@ -119,11 +119,10 @@ def search_papers(query, retmax=50):
 
 
 def search_europepmc(days, max_papers=40):
-    import time
     lookback_date = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
     query = (
-        '(TITLE:"Alzheimer*" OR TITLE:"dementia" OR TITLE:"mild cognitive impairment" OR TITLE:"MCI") '
-        f'AND OPEN_ACCESS:y AND PUB_DATE:[{lookback_date} TO 20261231]'
+        '(TITLE:"Alzheimer*" OR TITLE:"dementia" OR TITLE:"mild cognitive impairment") '
+        f'AND PUB_DATE:[{lookback_date} TO 20991231]'
     )
     params = f"?query={quote_plus(query)}&resultType=core&pageSize={max_papers}&format=json&cursorMark=*"
     url = EUROPEPMC_SEARCH + params
@@ -132,6 +131,9 @@ def search_europepmc(days, max_papers=40):
         req = Request(url, headers=HEADERS)
         with urlopen(req, timeout=30) as resp:
             body = resp.read().decode()
+        if not body or not body.strip():
+            print("[WARN] Europe PMC returned empty body", file=sys.stderr)
+            return []
         data = json.loads(body)
         results = data.get("resultList", {}).get("result", [])
         papers = []
@@ -141,7 +143,9 @@ def search_europepmc(days, max_papers=40):
             journal = r.get("journalTitle", "")
             abstract = r.get("abstractText", "")[:2000] if r.get("abstractText") else ""
             date_str = r.get("firstPublicationDate", "")
-            url_link = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else r.get("doi", "")
+            url_link = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else ""
+            if not url_link and r.get("doi"):
+                url_link = f"https://doi.org/{r['doi']}"
             keywords = r.get("keywordList", {}).get("keyword", [])
             if isinstance(keywords, str):
                 keywords = [keywords]
