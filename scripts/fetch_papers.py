@@ -119,12 +119,10 @@ def search_papers(query, retmax=50):
 
 
 def search_europepmc(days, max_papers=40):
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    lookback_date = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
-    query = f'(TITLE:"Alzheimer" OR TITLE:"dementia") AND FIRST_PUB_DATE:[{lookback_date} TO {today}]'
-    params = f"?query={quote_plus(query)}&resultType=core&pageSize={max_papers}&format=json&cursorMark=*"
+    query = '(TITLE:"Alzheimer" OR TITLE:"dementia" OR TITLE:"mild cognitive impairment") AND OPEN_ACCESS:y'
+    params = f"?query={quote_plus(query)}&resultType=core&pageSize={max_papers}&format=json&cursorMark=*&sort=DATE desc"
     url = EUROPEPMC_SEARCH + params
-    print(f"[INFO] Searching Europe PMC with query: {query}", file=sys.stderr)
+    print(f"[INFO] Searching Europe PMC...", file=sys.stderr)
     try:
         req = Request(url, headers=HEADERS)
         with urlopen(req, timeout=30) as resp:
@@ -137,15 +135,24 @@ def search_europepmc(days, max_papers=40):
             return []
         data = json.loads(body)
         hit_count = data.get("hitCount", 0)
-        print(f"[INFO] Europe PMC hit count: {hit_count}", file=sys.stderr)
+        print(f"[INFO] Europe PMC total hit count: {hit_count}", file=sys.stderr)
         results = data.get("resultList", {}).get("result", [])
         papers = []
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
         for r in results:
+            pub_date_str = r.get("firstPublicationDate", "")
+            if pub_date_str:
+                try:
+                    pub_date = datetime.fromisoformat(pub_date_str.replace("Z", "+00:00"))
+                    if pub_date < cutoff:
+                        continue
+                except Exception:
+                    pass
             pmid = r.get("pmid", "")
             title = r.get("title", "")
             journal = r.get("journalTitle", "")
             abstract = r.get("abstractText", "")[:2000] if r.get("abstractText") else ""
-            date_str = r.get("firstPublicationDate", "")
+            date_str = pub_date_str
             url_link = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else ""
             if not url_link and r.get("doi"):
                 url_link = f"https://doi.org/{r['doi']}"
@@ -162,7 +169,7 @@ def search_europepmc(days, max_papers=40):
                     "url": url_link,
                     "keywords": keywords,
                 })
-        print(f"[INFO] Europe PMC returned {len(papers)} papers", file=sys.stderr)
+        print(f"[INFO] Europe PMC returned {len(papers)} recent papers", file=sys.stderr)
         return papers
     except Exception as e:
         print(f"[ERROR] Europe PMC search failed: {e}", file=sys.stderr)
