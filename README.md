@@ -3,7 +3,7 @@
 阿茲海默症與失智症文獻日報，每日自動更新。
 
 - 資料來源：PubMed
-- AI 分析：Zhipu GLM-5-Turbo（備用：GLM-4.7 / GLM-4.7-Flash）
+- AI 分析：NVIDIA NIM Nemotron 3（主要模型：`nvidia/nemotron-3-super-120b-a12b`；備用模型：`nvidia/nemotron-3-nano-30b-a3b`）
 - 部署：GitHub Pages
 - 排程：每天 GMT+8 19:20 自動執行
 
@@ -20,7 +20,7 @@ scripts/
 
 ```bash
 # 需要設定環境變數
-export ZHIPU_API_KEY="your-api-key"
+export NVIDIA_API_KEY="your-api-key"
 
 # 抓取文獻
 node scripts/fetch-papers.mjs --days 7 --max-papers 40 --output papers.json

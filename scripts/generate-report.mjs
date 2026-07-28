@@ -3,9 +3,9 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 
-const API_BASE = process.env.ZHIPU_API_BASE || "https://open.bigmodel.cn/api/coding/paas/v4";
-const MODEL_FALLBACK_CHAIN = ["glm-5-turbo", "glm-4.7", "glm-4.7-flash"];
-const MAX_TOKENS = 50000;
+const API_BASE = process.env.NVIDIA_API_BASE || "https://integrate.api.nvidia.com/v1";
+const MODEL_FALLBACK_CHAIN = ["nvidia/nemotron-3-super-120b-a12b", "nvidia/nemotron-3-nano-30b-a3b"];
+const MAX_TOKENS = 16384;
 const TIMEOUT_MS = 480000;
 
 const SYSTEM_PROMPT = `你是阿茲海默症與失智症領域的資深研究員與科學傳播者。你的任務是：
@@ -133,15 +133,17 @@ function extractJson(text) {
   }
 }
 
-async function callZhipuAPI(apiKey, prompt, model) {
+async function callNvidiaAPI(apiKey, prompt, model) {
   const payload = {
     model,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: prompt },
     ],
-    temperature: 0.3,
-    top_p: 0.9,
+    temperature: 1.0,
+    top_p: 0.95,
+    stream: false,
+    chat_template_kwargs: { enable_thinking: false },
     max_tokens: MAX_TOKENS,
   };
 
@@ -175,7 +177,7 @@ async function analyzeWithFallback(apiKey, prompt) {
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         console.error(`[INFO] Trying ${model} (attempt ${attempt + 1})...`);
-        const result = await callZhipuAPI(apiKey, prompt, model);
+        const result = await callNvidiaAPI(apiKey, prompt, model);
         console.error(`[INFO] Analysis complete: ${result.top_picks?.length || 0} top picks, ${result.all_papers?.length || 0} total`);
         return result;
       } catch (e) {
@@ -204,7 +206,7 @@ function generateHtml(analysis) {
   const keywords = analysis.keywords || [];
   const topicDist = analysis.topic_distribution || {};
   const totalCount = topPicks.length + allPapers.length;
-  const usedModel = analysis._model || "glm-5-turbo";
+  const usedModel = analysis._model || "nvidia/nemotron-3-super-120b-a12b";
 
   const topPicksHtml = topPicks.map((p) => {
     const tags = (p.tags || []).map((t) => `<span class="tag">${esc(t)}</span>`).join("");
@@ -351,7 +353,7 @@ function generateHtml(analysis) {
       <div class="header-meta">
         <span class="badge badge-date">&#x1F4C5; ${dateDisplay}</span>
         <span class="badge badge-count">&#x1F4CA; ${totalCount} 篇文獻</span>
-        <span class="badge badge-source">Powered by PubMed + Zhipu AI</span>
+        <span class="badge badge-source">Powered by PubMed + NVIDIA AI</span>
       </div>
     </div>
   </header>
@@ -407,10 +409,10 @@ function escAttr(s) {
 
 async function main() {
   const opts = parseArgs();
-  const apiKey = process.env.ZHIPU_API_KEY || "";
+  const apiKey = process.env.NVIDIA_API_KEY || "";
 
   if (!apiKey) {
-    console.error("[ERROR] No API key. Set ZHIPU_API_KEY env var.");
+    console.error("[ERROR] No API key. Set NVIDIA_API_KEY env var.");
     process.exit(1);
   }
 

@@ -90,7 +90,7 @@ function generateIndex() {
     </a>
   </div>
   <footer>
-    <p>Powered by PubMed + Zhipu AI &middot; <a href="https://github.com/u8901006/alzheimer-dementia">GitHub</a></p>
+    <p>Powered by PubMed + NVIDIA NIM (Nemotron 3) &middot; <a href="https://github.com/u8901006/alzheimer-dementia">GitHub</a></p>
   </footer>
 </div>
 </body>
