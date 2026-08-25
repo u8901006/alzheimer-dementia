@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Alzheimer Dementia Daily &middot; 阿茲海默症文獻日報 &middot; 2026年8月25日</title>
+<meta name="description" content="2026年8月25日 阿茲海默症與失智症文獻日報，由 AI 自動彙整 PubMed 最新論文"/>
+<style>
+  :root { --bg: #f6f1e8; --surface: #fffaf2; --line: #d8c5ab; --text: #2b2118; --muted: #766453; --accent: #8c4f2b; --accent-soft: #ead2bf; --card-bg: color-mix(in srgb, var(--surface) 92%, white); }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: radial-gradient(circle at top, #fff6ea 0, var(--bg) 55%, #ead8c6 100%); color: var(--text); font-family: "Noto Sans TC", "PingFang TC", "Helvetica Neue", Arial, sans-serif; min-height: 100vh; overflow-x: hidden; }
+  .container { position: relative; z-index: 1; max-width: 880px; margin: 0 auto; padding: 60px 32px 80px; }
+  header { display: flex; align-items: center; gap: 16px; margin-bottom: 52px; animation: fadeDown 0.6s ease both; }
+  .logo { width: 48px; height: 48px; border-radius: 14px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; box-shadow: 0 4px 20px rgba(140,79,43,0.25); }
+  .header-text h1 { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .header-meta { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; align-items: center; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; letter-spacing: 0.3px; }
+  .badge-date { background: var(--accent-soft); border: 1px solid var(--line); color: var(--accent); }
+  .badge-count { background: rgba(140,79,43,0.06); border: 1px solid var(--line); color: var(--muted); }
+  .badge-source { background: transparent; color: var(--muted); font-size: 11px; padding: 0 4px; }
+  .summary-card { background: var(--card-bg); border: 1px solid var(--line); border-radius: 24px; padding: 28px 32px; margin-bottom: 32px; box-shadow: 0 20px 60px rgba(61,36,15,0.06); animation: fadeUp 0.5s ease 0.1s both; }
+  .summary-card h2 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.6px; color: var(--accent); margin-bottom: 16px; }
+  .summary-text { font-size: 15px; line-height: 1.8; color: var(--text); }
+  .section { margin-bottom: 36px; animation: fadeUp 0.5s ease both; }
+  .section-title { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+  .section-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; background: var(--accent-soft); }
+  .news-card { background: var(--card-bg); border: 1px solid var(--line); border-radius: 24px; padding: 22px 26px; margin-bottom: 12px; box-shadow: 0 8px 30px rgba(61,36,15,0.04); transition: background 0.2s, border-color 0.2s, transform 0.2s; }
+  .news-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(61,36,15,0.08); }
+  .news-card.featured { border-left: 3px solid var(--accent); }
+  .news-card.featured:hover { border-color: var(--accent); }
+  .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .rank-badge { background: var(--accent); color: #fff7f0; font-weight: 700; font-size: 12px; padding: 2px 8px; border-radius: 6px; }
+  .emoji-icon { font-size: 18px; }
+  .card-header-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .emoji-sm { font-size: 14px; }
+  .news-card h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; line-height: 1.5; }
+  .journal-source { font-size: 12px; color: var(--accent); margin-bottom: 8px; opacity: 0.8; }
+  .news-card p { font-size: 13.5px; line-height: 1.75; color: var(--muted); }
+  .card-footer { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .tag { padding: 2px 9px; background: var(--accent-soft); border-radius: 999px; font-size: 11px; color: var(--accent); }
+  .news-card a { font-size: 12px; color: var(--accent); text-decoration: none; opacity: 0.7; margin-left: auto; }
+  .news-card a:hover { opacity: 1; }
+  .utility-high { color: #5a7a3a; font-size: 11px; font-weight: 600; padding: 2px 8px; background: rgba(90,122,58,0.1); border-radius: 4px; }
+  .utility-mid { color: #9f7a2e; font-size: 11px; font-weight: 600; padding: 2px 8px; background: rgba(159,122,46,0.1); border-radius: 4px; }
+  .utility-low { color: var(--muted); font-size: 11px; font-weight: 600; padding: 2px 8px; background: rgba(118,100,83,0.08); border-radius: 4px; }
+  .utility-sm { font-size: 10px; }
+  .pico-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; padding: 12px; background: rgba(255,253,249,0.8); border-radius: 14px; border: 1px solid var(--line); }
+  .pico-item { display: flex; gap: 8px; align-items: baseline; }
+  .pico-label { font-size: 10px; font-weight: 700; color: #fff7f0; background: var(--accent); padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+  .pico-text { font-size: 12px; color: var(--muted); line-height: 1.4; }
+  .keywords-section { margin-bottom: 36px; }
+  .keywords { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .keyword { padding: 5px 14px; background: var(--accent-soft); border: 1px solid var(--line); border-radius: 20px; font-size: 12px; color: var(--accent); cursor: default; transition: background 0.2s; }
+  .keyword:hover { background: rgba(140,79,43,0.18); }
+  .topic-section { margin-bottom: 36px; }
+  .topic-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .topic-name { font-size: 13px; color: var(--muted); width: 100px; flex-shrink: 0; text-align: right; }
+  .topic-bar-bg { flex: 1; height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+  .topic-bar { height: 100%; background: linear-gradient(90deg, var(--accent), #c47a4a); border-radius: 4px; transition: width 0.6s ease; }
+  .topic-count { font-size: 12px; color: var(--accent); width: 24px; }
+  .links-section { margin-top: 48px; animation: fadeUp 0.5s ease 0.4s both; }
+  .link-card { display: flex; align-items: center; gap: 14px; padding: 18px 24px; background: var(--card-bg); border: 1px solid var(--line); border-radius: 24px; text-decoration: none; color: var(--text); transition: all 0.2s; box-shadow: 0 8px 30px rgba(61,36,15,0.04); margin-bottom: 12px; }
+  .link-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(61,36,15,0.08); }
+  .link-icon { font-size: 28px; flex-shrink: 0; }
+  .link-name { font-size: 15px; font-weight: 700; color: var(--text); flex: 1; }
+  .link-arrow { font-size: 18px; color: var(--accent); font-weight: 700; }
+  footer { margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--muted); display: flex; justify-content: space-between; animation: fadeUp 0.5s ease 0.5s both; }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 600px) { .container { padding: 36px 18px 60px; } .summary-card, .news-card { padding: 20px 18px; } .pico-grid { grid-template-columns: 1fr; } footer { flex-direction: column; gap: 6px; text-align: center; } .topic-name { width: 70px; font-size: 11px; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo">&#x1F9E0;</div>
+    <div class="header-text">
+      <h1>Alzheimer Dementia Daily &middot; 阿茲海默症文獻日報</h1>
+      <div class="header-meta">
+        <span class="badge badge-date">&#x1F4C5; 2026年8月25日</span>
+        <span class="badge badge-count">&#x1F4CA; 21 篇文獻</span>
+        <span class="badge badge-source">Powered by PubMed + NVIDIA AI</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="summary-card">
+    <h2>&#x1F4CB; 今日文獻趨勢</h2>
+    <p class="summary-text">今日文獻聚焦於阿茲海默症早期檢測與風險因子，特別是嗅覺功能、血清蛋白基因風險評分、高劑量流感疫苗與中年anosmia的關聯，顯示預防與早期診斷成為研究熱點，數位生物標記與跨語言語音分析也展現臨床推廣潛力。</p>
+  </div>
+
+  <div class="section"><div class="section-title"><span class="section-icon">&#x2B50;</span>今日精選 TOP Picks</div>
+        <div class="news-card featured">
+          <div class="card-header">
+            <span class="rank-badge">#1</span>
+            <span class="emoji-icon">💉</span>
+            <span class="utility-high">高實用性</span>
+          </div>
+          <h3>高劑量流感疫苗與阿茲海默症風險降低的關聯：高齡族群受益顯著</h3>
+          <p class="journal-source"> &middot; Risk of Alzheimer Dementia After High-Dose vs Standard-Dose Influenza Vaccination.</p>
+          <p>高劑量流感疫苗在65歲以上族群中顯著降低阿茲海默症發生率，25個月內需治療人數(NNT)為185.2，女性受益更持久，支持疫苗作為預防策略的潛力。</p>
+          
+            <div class="pico-grid">
+              <div class="pico-item"><span class="pico-label">P</span><span class="pico-text">65歲以上無認知障礙史之成年人</span></div>
+              <div class="pico-item"><span class="pico-label">I</span><span class="pico-text">高劑量 inaktivated 流感疫苗 (H-IIV)</span></div>
+              <div class="pico-item"><span class="pico-label">C</span><span class="pico-text">標準劑量 inactivated 流感疫苗 (S-IIV)</span></div>
+              <div class="pico-item"><span class="pico-label">O</span><span class="pico-text">阿茲海默症風險顯著降低（HR &lt; 1），25月內NNT=185.2</span></div>
+            </div>
+          <div class="card-footer">
+            <span class="tag">預防</span><span class="tag">藥物治療</span><span class="tag">神經發炎</span><span class="tag">健康政策</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/41921123/" target="_blank">閱讀原文 &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card featured">
+          <div class="card-header">
+            <span class="rank-badge">#2</span>
+            <span class="emoji-icon">🧬</span>
+            <span class="utility-high">高實用性</span>
+          </div>
+          <h3>血清總蛋白多基因風險評分預測阿茲海默症與輕度認知障礙發生，女性與年輕族群更敏感</h3>
+          <p class="journal-source"> &middot; Longitudinal Association of a Polygenic Risk Score for Plasma T-Tau With Incident Alzheimer Dementia and Mild Cognitive Impairment.</p>
+          <p>血清總蛋白多基因風險評分（PRStau）每增加1個標準差，阿茲海默症/輕度認知障礙風險上升29%，女性與年輕參與者風險增幅更大（HR up to 1.866），支持其作為早期風險 Stratification 工具。</p>
+          
+            <div class="pico-grid">
+              <div class="pico-item"><span class="pico-label">P</span><span class="pico-text">65歲以上無認知障礙之個體（HELIAD：n=618；UKB：n=142,637）</span></div>
+              <div class="pico-item"><span class="pico-label">I</span><span class="pico-text">血清總蛋白多基因風險評分 (PRStau)</span></div>
+              <div class="pico-item"><span class="pico-label">C</span><span class="pico-text">低風險組（PRStau低值）</span></div>
+              <div class="pico-item"><span class="pico-label">O</span><span class="pico-text">PRStau增加1 SD 與 阿茲海默症/輕度認知障礙發生風險增加 29%（HR=1.290）</span></div>
+            </div>
+          <div class="card-footer">
+            <span class="tag">生物標記</span><span class="tag">遺傳學</span><span class="tag">tau蛋白</span><span class="tag">MCI輕度認知障礙</span><span class="tag">阿茲海默症</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/41043097/" target="_blank">閱讀原文 &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card featured">
+          <div class="card-header">
+            <span class="rank-badge">#3</span>
+            <span class="emoji-icon">👃</span>
+            <span class="utility-high">高實用性</span>
+          </div>
+          <h3>中年診斷嗅覺喪失（anosmia）顯著增加阿茲海默症風險，但65歲後則無顯著關聯</h3>
+          <p class="journal-source"> &middot; Diagnosis of Anosmia in Middle Age, But Not in Older Adulthood, Increases Alzheimer Dementia Risk.</p>
+          <p>中年（40-65歲）診斷 anosmia 與 阿茲海默症發生風險增加 28%（HR=1.28），但65歲後診斷 anosmia 則無顯著關聯，提示嗅覺功能為早期預警指標，具時間窗口特異性。</p>
+          
+            <div class="pico-grid">
+              <div class="pico-item"><span class="pico-label">P</span><span class="pico-text">40歲以上韓國國民健康保險參保人（anosmia組 n=8,023；控制組 n=2,680,534）</span></div>
+              <div class="pico-item"><span class="pico-label">I</span><span class="pico-text">2006-2008年間診斷 anosmia</span></div>
+              <div class="pico-item"><span class="pico-label">C</span><span class="pico-text">無 anosmia 病史之對照組</span></div>
+              <div class="pico-item"><span class="pico-label">O</span><span class="pico-text">中年組 anosmia 與 阿茲海默症風險增加 28% (HR=1.28, 95% CI: 1.07-1.54)</span></div>
+            </div>
+          <div class="card-footer">
+            <span class="tag">阿茲海默症</span><span class="tag">生物標記</span><span class="tag">預防</span><span class="tag">社會決定因素</span><span class="tag">MCI輕度認知障礙</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/40091590/" target="_blank">閱讀原文 &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card featured">
+          <div class="card-header">
+            <span class="rank-badge">#4</span>
+            <span class="emoji-icon">🧠</span>
+            <span class="utility-mid">中實用性</span>
+          </div>
+          <h3>可穿戴腦電圖錄製嗅球電生理反應，Beta與Gamma頻帶變化伴隨認知衰退，具數位生物標記潛力</h3>
+          <p class="journal-source"> &middot; Noninvasive Electrophysiological Biomarkers of Olfactory Responses Across Cognitive States in Alzheimer Dementia: Cross-Sectional Study.</p>
+          <p>隨認知惡化（CN → MCI → AD），嗅球 Beta 頻帶功率（代表皮質反饋）遞減，Gamma 頻帶功率（代表嗅球活性）下降且反應潛伏期延長，支撐可穿戴 EEG 作為客觀、居家可用之嗅覺數位生物標記。</p>
+          
+            <div class="pico-grid">
+              <div class="pico-item"><span class="pico-label">P</span><span class="pico-text">認知正常 (n=18)、早期MCI (n=30)、晚期MCI (n=9)、阿茲海默症痴呆 (n=14)</span></div>
+              <div class="pico-item"><span class="pico-label">I</span><span class="pico-text">可穿戴6通道腦電圖記錄嗅氣刺激時之嗅球電生理反應</span></div>
+              <div class="pico-item"><span class="pico-label">C</span><span class="pico-text">不同認知狀態組間之電生理差異</span></div>
+              <div class="pico-item"><span class="pico-label">O</span><span class="pico-text">Beta 頻帶功率隨認知衰退遞減；Gamma 頻帶功率下降及反應延遲增加</span></div>
+            </div>
+          <div class="card-footer">
+            <span class="tag">數位生物標記</span><span class="tag">生物標記</span><span class="tag">阿茲海默症</span><span class="tag">MCI輕度認知障礙</span><span class="tag">臨床試驗</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/42335456/" target="_blank">閱讀原文 &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card featured">
+          <div class="card-header">
+            <span class="rank-badge">#5</span>
+            <span class="emoji-icon">🎤</span>
+            <span class="utility-mid">中實用性</span>
+          </div>
+          <h3>跨語言語音分析（英語+西班牙語）證明可解釋的語音特徵能通用識別阿茲海默症，AUC達0.88</h3>
+          <p class="journal-source"> &middot; Automated Speech Markers of Alzheimer Dementia: Test of Cross-Linguistic Generalizability.</p>
+          <p>結合語音時序（停頓、語速）與語義特徵（詞彙類別、語義變異），機器學習模型在英語與西班牙語雙語族群中識別阿茲海默症AUC達0.88，支持其作為低成本、可擴充之跨文化早期篩選工具。</p>
+          
+            <div class="pico-grid">
+              <div class="pico-item"><span class="pico-label">P</span><span class="pico-text">英語族群 (AD:58, HC:59) + 西班牙語族群 (AD:47, HC:47)</span></div>
+              <div class="pico-item"><span class="pico-label">I</span><span class="pico-text">自動語音與語言分析（ASLA），提取可解釋之語音時序及語義特徵</span></div>
+              <div class="pico-item"><span class="pico-label">C</span><span class="pico-text">健康對照組 (HC)</span></div>
+              <div class="pico-item"><span class="pico-label">O</span><span class="pico-text">組合特徵在英語族群中AUC=0.88；跨語言驗證顯示良好泛化能力</span></div>
+            </div>
+          <div class="card-footer">
+            <span class="tag">數位生物標記</span><span class="tag">認知功能</span><span class="tag">阿茲海默症</span><span class="tag">臨床試驗</span><span class="tag">預防</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/41091545/" target="_blank">閱讀原文 &#8594;</a>
+          </div>
+        </div></div>
+
+  <div class="section"><div class="section-title"><span class="section-icon">&#x1F4DA;</span>其他值得關注的文獻</div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">🏥</span>
+            <span class="utility-mid utility-sm">中</span>
+          </div>
+          <h3>類澱粉蛋白清除療法在早期阿茲海默症中的醫院資源準備情況：奧地利神經精神科問卷調查</h3>
+          <p class="journal-source"></p>
+          <p>奧地利神經與精神科部門對類澱粉蛋白抗體療法的準備不足，僅少數中心提供 amyloid-PET 或腰椎穿刺，凸顯早期診斷與多專業照護資源缺口。</p>
+          <div class="card-footer">
+            <span class="tag">類澱粉蛋白清除療法</span><span class="tag">神經影像</span><span class="tag">長期照護</span><span class="tag">健康政策</span><span class="tag">阿茲海默症</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/40911092/" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">💓</span>
+            <span class="utility-mid utility-sm">中</span>
+          </div>
+          <h3>高血壓與未治療高血壓增加晚年阿茲海默症與非阿茲海默症失智症風險：個人參與者資料_meta_分析</h3>
+          <p class="journal-source"></p>
+          <p>未治療高血壓增加 阿茲海mero症 風險 36%（HR=1.36），治療高血壓組風險仍升 29%（HR=1.29） vs 健康對照組，提示血壓控制雖有益但無法完全消除風險。</p>
+          <div class="card-footer">
+            <span class="tag">預防</span><span class="tag">血管性失智症</span><span class="tag">藥物治療</span><span class="tag">阿茲海默症</span><span class="tag">社會決定因素</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/39141884/" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">⚡</span>
+            <span class="utility-low utility-sm">低</span>
+          </div>
+          <h3>阿茲海默症患者中副臨床癲癇樣放電頻率高，特別是在早-onset 族群，延長EEG可提高檢出率</h3>
+          <p class="journal-source"></p>
+          <p>阿茲海默症患者副臨床癲癇樣放電 (SED) 整體發生率 18.3%，早-onset AD 族群在延長EEG下達 43.9%，提示皮質興奮性增高為早發病機制之可能特徵。</p>
+          <div class="card-footer">
+            <span class="tag">神經發炎</span><span class="tag">認知功能</span><span class="tag">阿茲海默症</span><span class="tag">臨床試驗</span><span class="tag">MCI輕度認知障礙</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/39962503/" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">🧠</span>
+            <span class="utility-low utility-sm">低</span>
+          </div>
+          <h3>阿茲海默症伴隨精神病症患者的認知特徵：執行功能與視空間能力較明顯受損</h3>
+          <p class="journal-source"></p>
+          <p>阿茲海默症伴隨幻覺或妄想之患者，較常見視空間、執行功能及語言受損，但因果方向尚未澄清，需縱向研究釐清神經精神症狀與認知退化之互動。</p>
+          <div class="card-footer">
+            <span class="tag">認知功能</span><span class="tag">阿茲海默症</span><span class="tag">額顳葉失智症</span><span class="tag">長期照護</span><span class="tag">照護者</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/39318171/" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">💊</span>
+            <span class="utility-mid utility-sm">中</span>
+          </div>
+          <h3>Brexpiprazole 治療阿茲海默症激動行為之隨機對照試驗：顯著改善激動症狀，效應大小中等</h3>
+          <p class="journal-source"></p>
+          <p>Brexpiprazole 2或3 mg/日 在12週內顯著降低 Cohen-Mansfield 激動量表總分（平均改善 -22.6 vs 安慰劑 -17.3），LSMD -5.32，p=0.003，支持其為激動行為之有效藥物選擇。</p>
+          <div class="card-footer">
+            <span class="tag">藥物治療</span><span class="tag">認知功能</span><span class="tag">阿茲海默症</span><span class="tag">照護者</span><span class="tag">長期照護</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/37930669/" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">🎵</span>
+            <span class="utility-mid utility-sm">中</span>
+          </div>
+          <h3>音樂療法對阿茲海默症患者之十大臨床轉介理由：神經科醫師實務指南</h3>
+          <p class="journal-source"></p>
+          <p>音樂療法為安全、非藥物干預，可改善情緒、減少激動、增進社交互動與生活品質，適合作為阿茲海默症綜合照護之輔助療法，神經科醫師應主動轉介。</p>
+          <div class="card-footer">
+            <span class="tag">照護者</span><span class="tag">生活品質</span><span class="tag">阿茲海默症</span><span class="tag">長期照護</span><span class="tag">預防</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/39185103/" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">🧠</span>
+            <span class="utility-mid utility-sm">中</span>
+          </div>
+          <h3>使用人工神經網路區別特發性正常壓力水腦症與阿茲海默症：羅夏墨跡測試在鑑別診斷中的應用</h3>
+          <p class="journal-source"></p>
+          <p>透過羅夏墨跡測試與人工神經網路模型，可辨識 INPH 與 AD 在感知反應模式之差異，支持其作為非侵入性工具協助鑑別診斷，尤其有助於識別適合神經外科手術之逆轉性痴呆病例。</p>
+          <div class="card-footer">
+            <span class="tag">神經影像</span><span class="tag">認知功能</span><span class="tag">阿茲海默症</span><span class="tag">長期照護</span><span class="tag">數位生物標記</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/40870377/" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">🧠</span>
+            <span class="utility-low utility-sm">低</span>
+          </div>
+          <h3>人工神經網路模型在辨識特發性正常壓力水腦症與阿茲海默症中的應用（重複報告）</h3>
+          <p class="journal-source"></p>
+          <p>與 PMC40870377 內容近乎相同，利用羅夏測試與ANN分析INPH與AD患者在感知反應上的差異，支持其在臨床鑑別診斷中的潛在應用。</p>
+          <div class="card-footer">
+            <span class="tag">神經影像</span><span class="tag">認知功能</span><span class="tag">阿茲海默症</span>
+            <a href="https://doi.org/10.21203/rs.3.rs-4145884/v1" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">🧠</span>
+            <span class="utility-low utility-sm">低</span>
+          </div>
+          <h3>慢性壓力與阿茲海默症風險：突觸記憶體（engram）重建是否為可能之治療策略？</h3>
+          <p class="journal-source"></p>
+          <p>探討慢性壓力可能經由突觸與功能連通性重塑影響阿茲海默症發生， hypothesise 神經可塑性與記憶痕跡（engram）修復或可成為治療標的，但機制尚不明確。</p>
+          <div class="card-footer">
+            <span class="tag">神經發炎</span><span class="tag">遺傳學</span><span class="tag">病理機制</span><span class="tag">阿茲海默症</span><span class="tag">預防</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/36775895/" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">💊</span>
+            <span class="utility-low utility-sm">低</span>
+          </div>
+          <h3>Aducanumab 對輕度認知障礙或輕度阿茲海默症無效，並具重大安全議題</h3>
+          <p class="journal-source"></p>
+          <p>Aducanumab 在 MCI 或早期 AD 中未顯示認知獲益，同時伴隨腦水腦、微出血等不良反應，風險獲益比不利，不建議作為標準治療。</p>
+          <div class="card-footer">
+            <span class="tag">藥物治療</span><span class="tag">類澱粉蛋白清除療法</span><span class="tag">阿茲海默症</span><span class="tag">神經影像</span><span class="tag">長期照護</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/36260879/" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">🦠</span>
+            <span class="utility-low utility-sm">低</span>
+          </div>
+          <h3>愛滋病毒感染者中的阿茲海默症臨床特徵：四例報告顯示記憶受損為主，部份腦脊液生物標記隨時間異常</h3>
+          <p class="journal-source"></p>
+          <p>在接受HAART且病毒載量未檢測到的HIV感染者中，阿茲海默症診斷罕見但存在，記憶障礙為主要表現，部份病例腦脊液tau/肌tau上升伴隨 amyloid-β42 下降，提示即使病毒受控，神經退化過程仍可能進行。</p>
+          <div class="card-footer">
+            <span class="tag">阿茲海默症</span><span class="tag">病理機制</span><span class="tag">遺傳學</span><span class="tag">長期照護</span><span class="tag">預防</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/34840876/" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">❤️</span>
+            <span class="utility-low utility-sm">低</span>
+          </div>
+          <h3>阿茲海默症與QT間隔延長之關聯：meta分析證實兩者間存在顯著相關</h3>
+          <p class="journal-source"></p>
+          <p>阿茲海默症患者QT間顯著延長（OR~1.66-1.88 vs 對照），且QT變異度與QT分散增加，支持心腦連結假設，但受限於對照群定義不一與心率校正因子爭議，機制尚待闡明。</p>
+          <div class="card-footer">
+            <span class="tag">阿茲海默症</span><span class="tag">神經發炎</span><span class="tag">預防</span><span class="tag">長期照護</span><span class="tag">健康政策</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/38725696/" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">😴</span>
+            <span class="utility-low utility-sm">低</span>
+          </div>
+          <h3>Down syndrome 成人中阻塞性睡眠呼吸中止症普遍存在（20.1%），並輕微增加阿茲海默症風險</h3>
+          <p class="journal-source"></p>
+          <p>在Medicaid登記的Down syndrome成人中，20.1%有OSA診斷，經加權後OSA組 阿茲海默症 風險輕微增加8%（HR=1.08），提示OSA篩選與治療可能對此高風險特殊族群有益。</p>
+          <div class="card-footer">
+            <span class="tag">睡眠</span><span class="tag">阿茲海默症</span><span class="tag">失智症</span><span class="tag">長期照護</span><span class="tag">健康政策</span>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/40903895/" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">⚠️</span>
+            <span class="utility-low utility-sm">低</span>
+          </div>
+          <h3>Falls 預測阿茲海默症惡化加快（標題僅，無摘要）</h3>
+          <p class="journal-source"></p>
+          <p>標題表明跌倒可能為阿茲海默症病情惡化的預測因子，但缺乏摘要與方法細節，無法評估其證據強度與臨床適用性。</p>
+          <div class="card-footer">
+            <span class="tag">阿茲海默症</span><span class="tag">長期照護</span><span class="tag">照護者</span><span class="tag">預防</span>
+            <a href="#" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">🧠</span>
+            <span class="utility-low utility-sm">低</span>
+          </div>
+          <h3>神經退化是否滯後於tau蛋白沉積在阿茲海默症中？(標題僅，無摘要)</h3>
+          <p class="journal-source"></p>
+          <p>探討tau病理與神經元損傷之時序關係，但缺乏摘要與結果，無法評估其對了解病理機制或早期診斷時間窗之貢獻。</p>
+          <div class="card-footer">
+            <span class="tag">tau蛋白</span><span class="tag">病理機制</span><span class="tag">阿茲海默症</span><span class="tag">神經影像</span>
+            <a href="#" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="card-header-row">
+            <span class="emoji-sm">💊</span>
+            <span class="utility-low utility-sm">低</span>
+          </div>
+          <h3>標準化阿茲海默症激動行為照護路徑：隨機對照試驗（StaN trial）結果（標題僅，無摘要）</h3>
+          <p class="journal-source"></p>
+          <p>評估整合照護路徑在減少阿茲海默症激動行為方面是否優於常規照護，但缺乏摘要，無法得知主要結論與效應大小。</p>
+          <div class="card-footer">
+            <span class="tag">藥物治療</span><span class="tag">照護者</span><span class="tag">阿茲海默症</span><span class="tag">長期照護</span>
+            <a href="#" target="_blank">PubMed &#8594;</a>
+          </div>
+        </div></div>
+
+  <div class="topic-section section"><div class="section-title"><span class="section-icon">&#x1F4CA;</span>主題分佈</div>
+            <div class="topic-row">
+              <span class="topic-name">阿茲海默症</span>
+              <div class="topic-bar-bg"><div class="topic-bar" style="width:100%"></div></div>
+              <span class="topic-count">22</span>
+            </div>
+            <div class="topic-row">
+              <span class="topic-name">失智症</span>
+              <div class="topic-bar-bg"><div class="topic-bar" style="width:18%"></div></div>
+              <span class="topic-count">4</span>
+            </div></div>
+
+  <div class="keywords-section section"><div class="section-title"><span class="section-icon">&#x1F3F7;&#xFE0F;</span>關鍵字</div><div class="keywords"><span class="keyword">阿茲海默症</span><span class="keyword">早期診斷</span><span class="keyword">預防</span><span class="keyword">數位生物標記</span><span class="keyword">流感疫苗</span><span class="keyword">嗅覺功能</span><span class="keyword">tau蛋白</span><span class="keyword">多基因風險評分</span><span class="keyword">anosmia</span><span class="keyword">語音分析</span></div></div>
+
+  <div class="links-section">
+    <a href="https://www.leepsyclinic.com/" class="link-card" target="_blank">
+      <span class="link-icon">&#x1F3E5;</span>
+      <span class="link-name">李政洋身心診所首頁</span>
+      <span class="link-arrow">&#8594;</span>
+    </a>
+    <a href="https://blog.leepsyclinic.com/" class="link-card" target="_blank">
+      <span class="link-icon">&#x1F4E8;</span>
+      <span class="link-name">訂閱電子報</span>
+      <span class="link-arrow">&#8594;</span>
+    </a>
+    <a href="https://buymeacoffee.com/CYlee" class="link-card" target="_blank">
+      <span class="link-icon">&#x2615;</span>
+      <span class="link-name">Buy Me a Coffee</span>
+      <span class="link-arrow">&#8594;</span>
+    </a>
+  </div>
+
+  <footer>
+    <span>資料來源：PubMed &middot; 分析模型：nvidia/nemotron-3-super-120b-a12b</span>
+    <span><a href="https://github.com/u8901006/alzheimer-dementia">GitHub</a></span>
+  </footer>
+</div>
+</body>
+</html>
