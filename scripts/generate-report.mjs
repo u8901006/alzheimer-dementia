@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 
 const API_BASE = process.env.NVIDIA_API_BASE || "https://integrate.api.nvidia.com/v1";
-const MODEL_FALLBACK_CHAIN = ["nvidia/nemotron-3-super-120b-a12b", "nvidia/nemotron-3-nano-30b-a3b"];
+const MODEL_FALLBACK_CHAIN = ["nvidia/nemotron-3-ultra-550b-a55b"];
 const MAX_TOKENS = 16384;
 const TIMEOUT_MS = 480000;
 
@@ -206,7 +206,7 @@ function generateHtml(analysis) {
   const keywords = analysis.keywords || [];
   const topicDist = analysis.topic_distribution || {};
   const totalCount = topPicks.length + allPapers.length;
-  const usedModel = analysis._model || "nvidia/nemotron-3-super-120b-a12b";
+  const usedModel = analysis._model || "nvidia/nemotron-3-ultra-550b-a55b";
 
   const topPicksHtml = topPicks.map((p) => {
     const tags = (p.tags || []).map((t) => `<span class="tag">${esc(t)}</span>`).join("");
